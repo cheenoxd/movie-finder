@@ -1,0 +1,18 @@
+Content-Type: text/html;charset=utf-8
+Date: Tue, 12 Nov 2024 18:00:57 GMT
+Server: openresty
+Link: </assets/2/source-sans-pro-v14-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular-f38472b9e378b8c936f55a92677f575ab69e414d7cc3706ecfefeacd994b7975.woff2>; rel=preload; as=font; type=font/woff2; crossorigin
+Content-Language: en
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Etag: W/"435e086fad8c0bb925dd3554f4d9787a"
+Cache-Control: public, max-age=0
+Set-Cookie: session=eyJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiZDFkZjkyNjQ4YTBjMmNkMGFlMzM3NjdiMTBiNjlmZWYyNTY4MGQ3NWQ0NjdlYjU2OWI4NWYxMjNjMjgzMTMwZCIsImV4cCI6MTczNDAyNjI3MSwicHJpdmlsZWdlIjowLCJfY3NyZl90b2tlbiI6ImJmc3lBOWZZU1dncHQ4WGtPOHczd2hxU1l2cWFzN0tSdGlpQ19rTjQxdVU9IiwibmJmIjoxNzMxNDM0NDU3LjMwMzc4NjMsInZlcnNpb24iOjF9.y01nGSRZMXvxvA_c0ofQTO_LN2FXZIPVn2IlOUY2LSk; path=/; expires=Tue, 26 Nov 2024 18:00:57 GMT; secure; httponly; samesite=lax
+Content-Encoding: gzip
+Vary: accept-encoding
+X-Cache: Miss from cloudfront
+Via: 1.1 e61bcf0a5eee0947af7e166c03213906.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: YTO53-P1
+Alt-Svc: h3=":443"; ma=86400
+X-Amz-Cf-Id: lXmaq1dseBzv-w25ZH9z-jofMII7uFEkxvrFok8rsteQRipCSmbFqQ==

@@ -1,0 +1,16 @@
+Content-Type: text/plain;charset=utf-8
+Date: Sat, 26 Oct 2024 00:03:52 GMT
+Server: openresty
+Cache-Control: public, max-age=2592000
+Last-Modified: Tue, 22 Oct 2024 18:36:50 GMT
+Content-Language: en-US
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Content-Type-Options: nosniff
+Content-Encoding: gzip
+Vary: accept-encoding
+X-Cache: Hit from cloudfront
+Via: 1.1 c6adbb6591d0fc149fcaa981b4104ccc.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: YTO53-P1
+Alt-Svc: h3=":443"; ma=86400
+X-Amz-Cf-Id: EQxZCoYDIKp5uuYPeR9mYy7GgTB4pcEXoSSZk0KZ7l7fiurfs5zBMQ==
+Age: 1530791

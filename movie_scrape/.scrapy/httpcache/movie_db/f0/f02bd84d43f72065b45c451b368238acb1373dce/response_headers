@@ -1,0 +1,19 @@
+Content-Type: text/html;charset=utf-8
+Date: Tue, 12 Nov 2024 17:57:51 GMT
+Server: openresty
+Set-Cookie: preferences=%7B%22adult%22%3Afalse%2C%22i18n_fallback_language%22%3A%22en-US%22%2C%22locale%22%3A%22en%22%2C%22country_code%22%3A%22CA%22%2C%22timezone%22%3A%22America%2FToronto%22%7D; path=/; expires=Mon, 12 May 2025 17:57:51 GMT; secure; httponly; samesite=lax
+Set-Cookie: session=eyJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiYjRmZDg2NDk5Njc1NTZlZTU2NWViOWQzZjI2NDUyMmUyNWYzNDNhNmQxZDcwZjZjMGVjMWRmYzc2ZWQ3NGEzOCIsImV4cCI6MTczNDAyNjI3MSwicHJpdmlsZWdlIjowLCJfY3NyZl90b2tlbiI6IkFyaHFPS1hmQ0RiNHlVMWNIcTZVSGJWNW9ONUtpbW5FQjVaZW45OVlOcDQ9IiwibmJmIjoxNzMxNDM0MjcxLjU0NDMyOCwidmVyc2lvbiI6MX0.Txjlam5qtpR6sb3Q73dHLOHYaljIHeXJaNUByo13Atg; path=/; expires=Tue, 26 Nov 2024 17:57:51 GMT; secure; httponly; samesite=lax
+Link: </assets/2/source-sans-pro-v14-vietnamese_latin-ext_latin_greek-ext_greek_cyrillic-ext_cyrillic-regular-f38472b9e378b8c936f55a92677f575ab69e414d7cc3706ecfefeacd994b7975.woff2>; rel=preload; as=font; type=font/woff2; crossorigin
+Content-Language: en
+Strict-Transport-Security: max-age=31536000; includeSubDomains; preload
+X-Xss-Protection: 1; mode=block
+X-Content-Type-Options: nosniff
+Etag: W/"eb5b1f69f4d2a79b712bcb6f71e43d86"
+Cache-Control: public, max-age=0
+Content-Encoding: gzip
+Vary: accept-encoding
+X-Cache: Miss from cloudfront
+Via: 1.1 3ab0185eec57f05477f341b30c1a29d4.cloudfront.net (CloudFront)
+X-Amz-Cf-Pop: YTO53-P1
+Alt-Svc: h3=":443"; ma=86400
+X-Amz-Cf-Id: Tgii52x5WkR3Ut-dB92isKhmT-LpwlaBNC9cTHZ5adHAhefM4R4KjA==

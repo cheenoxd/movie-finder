@@ -1,0 +1,5 @@
+Accept: text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8
+Accept-Language: en
+User-Agent: Scrapy/2.11.2 (+https://scrapy.org)
+Accept-Encoding: gzip, deflate
+Cookie: preferences=%7B%22adult%22%3Afalse%2C%22i18n_fallback_language%22%3A%22en-US%22%2C%22locale%22%3A%22en%22%2C%22country_code%22%3A%22CA%22%2C%22timezone%22%3A%22America%2FToronto%22%7D; session=eyJhbGciOiJIUzI1NiJ9.eyJzZXNzaW9uX2lkIjoiZDFkZjkyNjQ4YTBjMmNkMGFlMzM3NjdiMTBiNjlmZWYyNTY4MGQ3NWQ0NjdlYjU2OWI4NWYxMjNjMjgzMTMwZCIsImV4cCI6MTczNDAyNjI3MSwicHJpdmlsZWdlIjowLCJfY3NyZl90b2tlbiI6ImJmc3lBOWZZU1dncHQ4WGtPOHczd2hxU1l2cWFzN0tSdGlpQ19rTjQxdVU9IiwibmJmIjoxNzMxNDM0NjY5Ljg1MjA3ODcsInZlcnNpb24iOjF9.G_VypIv1mX9HpSUcj_PLEQ-3X99R_fKK6VyvBbwivt8
