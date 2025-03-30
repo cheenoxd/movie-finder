@@ -1,2 +1,7 @@
 .env
 .cache
+.next
+frontend/node_modules
+venv/
+.next
+.DS_Store
