@@ -1,7 +1,34 @@
-import type { NextConfig } from "next";
+// next.config.js
+const path = require('path');
 
-const nextConfig: NextConfig = {
-  /* config options here */
+/** @type {import('next').NextConfig} */
+module.exports = {
+  experimental: { appDir: true },
+  webpack(config) {
+    config.resolve.alias = {
+      ...(config.resolve.alias || {}),
+      '@': path.resolve(__dirname, 'app'),
+      '@components': path.resolve(__dirname, 'components'),
+    };
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: [
+        {
+          loader: '@svgr/webpack',
+          options: {
+            svgo: true,
+            svgoConfig: {
+              plugins: [
+                { name: 'removeViewBox', active: false },
+                { name: 'removeDimensions', active: true },
+              ],
+            },
+          },
+        },
+      ],
+    });
+
+    return config;
+  },
 };
-
-export default nextConfig;
