@@ -17,22 +17,23 @@
     "isolatedModules": true,
     "jsx": "preserve",
     "incremental": true,
+    "baseUrl": ".", // ← root of your Next app
+    "paths": {
+      "@/*": [
+        "app/*"
+      ] // "@/foo" → "<root>/app/foo"
+    },
     "plugins": [
       {
         "name": "next"
-        
       }
-    ],
-    "paths": {
-      "@/*": [
-        "./src/*"
-      ]
-    }
+    ]
   },
   "include": [
-    "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
+    "app/**/*",
+    "next-env.d.ts",
     ".next/types/**/*.ts"
   ],
   "exclude": [
