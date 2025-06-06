@@ -7,10 +7,16 @@ load_dotenv()
 
 uri = os.getenv("MONGO_URI")
 
-client = MongoClient(uri, server_api=ServerApi('1'))
+# Force TLS, allow self-signed certs
+client = MongoClient(
+    uri,
+    server_api=ServerApi('1'),
+    tls=True,
+    tlsAllowInvalidCertificates=True  # DEV ONLY
+)
 
 try:
     client.admin.command('ping')
-    print("Pinged your deployment. You successfully connected to MongoDB!")
+    print("✅ Connected to MongoDB!")
 except Exception as e:
-    print(e)
+    print("❌ MongoDB connection error:", e)

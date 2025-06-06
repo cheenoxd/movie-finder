@@ -86,7 +86,7 @@ export default function SettingsPage() {
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
-            size="sm"
+            size="sm" 
             className="mb-6 gap-1"
             onClick={() => router.push("/profile")}
           >

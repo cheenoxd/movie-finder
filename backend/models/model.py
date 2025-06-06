@@ -4,8 +4,13 @@ import re
 import nltk
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
+import kagglehub
+import os
 
-movies = pd.read_csv("backend/models/movie_data.csv")
+# nltk.download('punkt_tab')
+# nltk.download('stopwords')
+
+movies = pd.read_csv("backend/models/movies.csv")
 movies['clean_overview'] = movies['Overview'].fillna('')
 
 # Clean up text: Convert to lowercase, remove non-alphanumeric characters, and trim spaces
