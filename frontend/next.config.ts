@@ -1,9 +1,22 @@
 // next.config.js
-const path = require('path');
+import path from 'path';
+import type { NextConfig } from 'next';
 
-/** @type {import('next').NextConfig} */
-module.exports = {
-  experimental: { appDir: true },
+const nextConfig: NextConfig = {
+  experimental: {
+    serverActions: {
+      bodySizeLimit: '2mb',
+    },
+  },
+  images: {
+    domains: ['image.tmdb.org'],
+    formats: ['image/avif', 'image/webp'],
+  },
+  reactStrictMode: true,
+  swcMinify: true,
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
+  },
   webpack(config) {
     config.resolve.alias = {
       ...(config.resolve.alias || {}),
@@ -31,4 +44,27 @@ module.exports = {
 
     return config;
   },
+  async headers() {
+    return [
+      {
+        source: '/:path*',
+        headers: [
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+        ],
+      },
+    ]
+  },
 };
+
+export default nextConfig;
