@@ -1,51 +1,70 @@
 "use client"
 
-import Link from "next/link"
-import { Film } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import GoogleLogo from '../components/icons/GoogleLogo.svg'
-export default function SignInPage() {
-  return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-background p-4">
-      <Link href="/" className="flex items-center gap-2 mb-8">
-        <Film className="h-6 w-6" />
-        <span className="text-xl font-bold">MovieHaven</span>
-      </Link>
+import { useRouter } from 'next/navigation'
+import { Button } from '@/components/ui/button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { toast } from 'sonner'
+import Image from 'next/image'
 
+export default function SignInPage() {
+  const router = useRouter()
+
+  const handleGoogleSignIn = async () => {
+    try {
+      console.log('Initiating Google sign-in...')
+      const response = await fetch('http://localhost:5001/auth/google', {
+        method: 'GET',
+        credentials: 'include',
+        headers: {
+          'Accept': 'application/json',
+        },
+      })
+
+      const data = await response.json()
+      
+      if (!response.ok) {
+        console.error('Server error:', data)
+        throw new Error(data.error || 'Failed to initiate Google sign in')
+      }
+
+      if (!data.url) {
+        console.error('No URL in response:', data)
+        throw new Error('Invalid response from server')
+      }
+
+      console.log('Redirecting to:', data.url)
+      window.location.href = data.url
+    } catch (error) {
+      console.error('Google sign-in error:', error)
+      toast.error(error instanceof Error ? error.message : 'Failed to sign in with Google')
+    }
+  }
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-100">
       <Card className="w-full max-w-md">
-        <CardHeader className="space-y-1">
-          <CardTitle className="text-2xl font-bold text-center">Sign in to MovieHaven</CardTitle>
-          <CardDescription className="text-center">Continue with Google to access your account</CardDescription>
+        <CardHeader>
+          <CardTitle className="text-2xl text-center">Welcome back</CardTitle>
+          <CardDescription className="text-center">
+            Sign in to your account to continue
+          </CardDescription>
         </CardHeader>
-        <CardContent className="flex justify-center">
-         <a href="http://localhost:5001/login">
-         <Button
+        <CardContent>
+          <Button
             variant="outline"
-            size="lg"
-            className="w-full max-w-sm flex items-center gap-2"
-            onClick={() => {
-              
-              console.log("Google OAuth login initiated")
-            }}
+            className="w-full"
+            onClick={handleGoogleSignIn}
           >
-         <GoogleLogo className="h-6 w-6" />
-            Continue with Google
+            <Image
+              src="/google.svg"
+              alt="Google"
+              width={24}
+              height={24}
+              className="mr-2"
+            />
+            Sign in with Google
           </Button>
-         </a>
         </CardContent>
-        {/* <CardFooter className="flex justify-center">
-          <p className="text-sm text-muted-foreground">
-            By continuing, you agree to our{" "}
-            <Link href="/terms" className="text-primary hover:underline">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link href="/privacy" className="text-primary hover:underline">
-              Privacy Policy
-            </Link>
-          </p>
-        </CardFooter> */}
       </Card>
     </div>
   )

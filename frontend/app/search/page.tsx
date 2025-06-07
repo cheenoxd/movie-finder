@@ -2,23 +2,42 @@
 
 import type React from "react"
 
-import { useState } from "react"
+import { useEffect, useState } from "react"
 import { useSearchParams } from "next/navigation"
 import Navbar from "@/components/navbar"
 import { Input } from "@/components/ui/input"
 import { Button } from "@/components/ui/button"
 import { Search } from "lucide-react"
-import MovieGrid from "@/components/movie-grid"
+import { Card, CardContent, CardFooter } from "@/components/ui/card"
+import Image from "next/image"
+import Link from "next/link"
+import { Movie } from "@/lib/types"
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
   const initialQuery = searchParams.get("q") || ""
   const [searchQuery, setSearchQuery] = useState(initialQuery)
+  const [results, setResults] = useState<Movie[]>([])
+  const [loading, setLoading] = useState(false)
+
+  useEffect(() => {
+    if (initialQuery) {
+      setLoading(true)
+      fetch(`http://localhost:5001/api/movies/search?q=${encodeURIComponent(initialQuery)}`)
+        .then(res => res.json())
+        .then(data => {
+          setResults(data.results || [])
+          setLoading(false)
+        })
+        .catch(() => setLoading(false))
+    }
+  }, [initialQuery])
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
-    // In a real app, you would trigger a search here
-    console.log("Searching for:", searchQuery)
+    if (searchQuery.trim()) {
+      window.location.href = `/search?q=${encodeURIComponent(searchQuery.trim())}`
+    }
   }
 
   return (
@@ -45,7 +64,39 @@ export default function SearchPage() {
         {initialQuery && (
           <div>
             <h2 className="text-xl font-semibold mb-4">Search results for "{initialQuery}"</h2>
-            <MovieGrid />
+            {loading ? (
+              <div>Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+                {results.map((movie) => (
+                  <Link href={`/movie/${movie.id}`} key={movie.id}>
+                    <Card className="overflow-hidden h-full transition-all duration-200 hover:shadow-lg hover:scale-105">
+                      <div className="aspect-[2/3] relative">
+                        <Image
+                          src={
+                            movie.poster_path
+                              ? `https://image.tmdb.org/t/p/w500${movie.poster_path}`
+                              : "/placeholder.svg?height=450&width=300"
+                          }
+                          alt={movie.title}
+                          fill
+                          className="object-cover"
+                        />
+                      </div>
+                      <CardContent className="p-3">
+                        <h3 className="font-semibold line-clamp-1">{movie.title}</h3>
+                        <p className="text-sm text-muted-foreground">{movie.release_date ? new Date(movie.release_date).getFullYear() : ""}</p>
+                      </CardContent>
+                      <CardFooter className="p-3 pt-0 flex justify-between">
+                        <div className="flex items-center">
+                          <span className="text-sm font-medium">{movie.vote_average ? movie.vote_average.toFixed(1) : "N/A"}</span>
+                        </div>
+                      </CardFooter>
+                    </Card>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
         )}
       </div>

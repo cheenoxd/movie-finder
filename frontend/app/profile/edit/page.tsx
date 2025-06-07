@@ -1,6 +1,6 @@
 "use client"
 
-import React, { useState } from "react"
+import { useEffect, useState } from "react"
 import { useRouter } from "next/navigation"
 import { Camera, ArrowLeft } from "lucide-react"
 import Navbar from "@/components/navbar"
@@ -20,42 +20,102 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
 import { Separator } from "@/components/ui/separator"
 import { toast } from "sonner"
 
+interface User {
+  id: string;
+  name: string;
+  email: string;
+  picture: string;
+  created_at: string;
+}
+
 export default function EditProfilePage() {
   const router = useRouter()
-  const [isLoading, setIsLoading] = useState(false)
-
-  // Mock user data
+  const [user, setUser] = useState<User | null>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [isSaving, setIsSaving] = useState(false)
   const [formData, setFormData] = useState({
-    name: "John Doe",
-    username: "johndoe",
-    email: "john.doe@example.com",
-    bio: "Movie enthusiast and avid collector of film memorabilia. I love sci-fi, drama, and classic films from the 70s and 80s.",
+    name: "",
+    email: ""
   })
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { name, value } = e.target
-    setFormData((prev) => ({ ...prev, [name]: value }))
-  }
+
+  useEffect(() => {
+    // Fetch user data from backend
+    fetch("http://localhost:5001/api/user", {
+      credentials: "include"
+    })
+      .then(res => res.json())
+      .then(data => {
+        setUser(data.user)
+        setFormData({
+          name: data.user.name || "",
+          email: data.user.email || ""
+        })
+        setIsLoading(false)
+      })
+      .catch(error => {
+        console.error("Error fetching user data:", error)
+        setIsLoading(false)
+        // Redirect to sign in if not authenticated
+        router.push("/signin")
+      })
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    setIsLoading(true)  
+    setIsSaving(true)
 
-    // Simulate API call
-    setTimeout(() => {
-      setIsLoading(false)
-
-      toast.success("Profile updated", {
-        description: "Your profile has been updated successfully.",
+    try {
+      const response = await fetch("http://localhost:5001/api/user", {
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify(formData)
       })
 
-      router.push("/profile")
-    }, 1000)
+      if (response.ok) {
+        toast.success("Profile updated successfully")
+        router.push("/profile")
+      } else {
+        const error = await response.json()
+        toast.error(error.message || "Failed to update profile")
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error)
+      toast.error("Failed to update profile")
+    } finally {
+      setIsSaving(false)
+    }
   }
 
-  const handleCancel = () => {
-    router.push("/profile")
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }))
+  }
+
+  if (isLoading) {
+    return (
+      <main className="min-h-screen bg-background">
+        <Navbar />
+        <div className="container mx-auto px-4 py-8">
+          <div className="max-w-2xl mx-auto">
+            <div className="animate-pulse">
+              <div className="h-8 w-48 bg-muted mb-8" />
+              <div className="h-32 bg-muted mb-4" />
+              <div className="h-32 bg-muted" />
+            </div>
+          </div>
+        </div>
+      </main>
+    )
+  }
+
+  if (!user) {
+    return null // Will redirect to sign in
   }
 
   return (
@@ -65,115 +125,63 @@ export default function EditProfilePage() {
         <div className="max-w-2xl mx-auto">
           <Button
             variant="ghost"
-            size="sm"
-            className="mb-6 gap-1"
+            className="mb-6"
             onClick={() => router.push("/profile")}
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="h-4 w-4 mr-2" />
             Back to Profile
           </Button>
 
           <Card>
             <CardHeader>
-              <CardTitle className="text-2xl">Edit Profile</CardTitle>
+              <CardTitle>Edit Profile</CardTitle>
               <CardDescription>
-                Update your profile information and how others see you on MovieHaven
+                Update your profile information
               </CardDescription>
             </CardHeader>
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-2">
+                  <Label htmlFor="name">Name</Label>
+                  <Input
+                    id="name"
+                    name="name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    placeholder="Your name"
+                  />
+                </div>
 
-            <form onSubmit={handleSubmit}>
-              <CardContent className="space-y-6">
-                {/* Profile Picture */}
-                <div className="flex flex-col items-center space-y-4">
-                  <div className="relative">
-                    <Avatar className="h-24 w-24">
-                      <AvatarImage
-                        src="/placeholder.svg?height=96&width=96"
-                        alt="Profile picture"
-                      />
-                      <AvatarFallback className="text-2xl">JD</AvatarFallback>
-                    </Avatar>
-                    <Button
-                      size="icon"
-                      variant="secondary"
-                      className="absolute bottom-0 right-0 h-8 w-8 rounded-full"
-                    >
-                      <Camera className="h-4 w-4" />
-                      <span className="sr-only">Change profile picture</span>
-                    </Button>
-                  </div>
-                  <Button variant="outline" size="sm" type="button">
-                    Change Profile Picture
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    name="email"
+                    type="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Your email"
+                    disabled
+                  />
+                  <p className="text-sm text-muted-foreground">
+                    Email cannot be changed
+                  </p>
+                </div>
+
+                <div className="flex justify-end gap-4">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => router.push("/profile")}
+                  >
+                    Cancel
+                  </Button>
+                  <Button type="submit" disabled={isSaving}>
+                    {isSaving ? "Saving..." : "Save Changes"}
                   </Button>
                 </div>
-
-                <Separator />
-
-                {/* Basic Information */}
-                <div className="space-y-4">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div className="space-y-2">
-                      <Label htmlFor="name">Full Name</Label>
-                      <Input
-                        id="name"
-                        name="name"
-                        value={formData.name}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="space-y-2">
-                      <Label htmlFor="username">Username</Label>
-                      <Input
-                        id="username"
-                        name="username"
-                        value={formData.username}
-                        onChange={handleInputChange}
-                      />
-                    </div>
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input
-                      id="email"
-                      name="email"
-                      type="email"
-                      value={formData.email}
-                      onChange={handleInputChange}
-                    />
-                  </div>
-
-                  <div className="space-y-2">
-                    <Label htmlFor="bio">Bio</Label>
-                    <Textarea
-                      id="bio"
-                      name="bio"
-                      rows={4}
-                      placeholder="Tell us about yourself and your movie preferences..."
-                      value={formData.bio}
-                      onChange={handleInputChange}
-                    />
-                    <p className="text-xs text-muted-foreground">
-                      {formData.bio.length}/250 characters
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
-
-              <CardFooter className="flex justify-between">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleCancel}
-                >
-                  Cancel
-                </Button>
-                <Button type="submit" disabled={isLoading}>
-                  {isLoading ? "Saving..." : "Save Changes"}
-                </Button>
-              </CardFooter>
-            </form>
+              </form>
+            </CardContent>
           </Card>
         </div>
       </div>

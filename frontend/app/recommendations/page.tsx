@@ -10,101 +10,7 @@ import { Card, CardContent, CardFooter } from "@/components/ui/card"
 import { Skeleton } from "@/components/ui/skeleton"
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-
-interface Movie {
-  id: number
-  title: string
-  poster_path: string
-  vote_average: number
-  release_date: string
-  genre_ids: number[]
-}
-
-// const mockFavorites: Movie[] = [
-//   {
-//     id: 1,
-//     title: "The Shawshank Redemption",
-//     poster_path: "/q6y0Go1tsGEsmtFryDOJo3dEmqu.jpg",
-//     vote_average: 8.7,
-//     release_date: "1994-09-23",
-//     genre_ids: [18, 80],
-//   },
-//   {
-//     id: 2,
-//     title: "The Godfather",
-//     poster_path: "/3bhkrj58Vtu7enYsRolD1fZdja1.jpg",
-//     vote_average: 8.7,
-//     release_date: "1972-03-14",
-//     genre_ids: [18, 80],
-//   },
-//   {
-//     id: 3,
-//     title: "The Dark Knight",
-//     poster_path: "/qJ2tW6WMUDux911r6m7haRef0WH.jpg",
-//     vote_average: 8.5,
-//     release_date: "2008-07-16",
-//     genre_ids: [18, 28, 80, 53],
-//   },
-// ]
-
-// const mockRecommendations: Movie[] = [
-//   {
-//     id: 4,
-//     title: "Pulp Fiction",
-//     poster_path: "/d5iIlFn5s0ImszYzBPb8JPIfbXD.jpg",
-//     vote_average: 8.5,
-//     release_date: "1994-09-10",
-//     genre_ids: [53, 80],
-//   },
-//   {
-//     id: 5,
-//     title: "Fight Club",
-//     poster_path: "/pB8BM7pdSp6B6Ih7QZ4DrQ3PmJK.jpg",
-//     vote_average: 8.4,
-//     release_date: "1999-10-15",
-//     genre_ids: [18, 53, 35],
-//   },
-//   {
-//     id: 6,
-//     title: "Inception",
-//     poster_path: "/9gk7adHYeDvHkCSEqAvQNLV5Uge.jpg",
-//     vote_average: 8.4,
-//     release_date: "2010-07-15",
-//     genre_ids: [28, 878, 12],
-//   },
-//   {
-//     id: 7,
-//     title: "The Matrix",
-//     poster_path: "/f89U3ADr1oiB1s9GkdPOEpXUk5H.jpg",
-//     vote_average: 8.2,
-//     release_date: "1999-03-30",
-//     genre_ids: [28, 878],
-//   },
-//   {
-//     id: 8,
-//     title: "Goodfellas",
-//     poster_path: "/aKuFiU82s5ISJpGZp7YkIr3kCUd.jpg",
-//     vote_average: 8.5,
-//     release_date: "1990-09-12",
-//     genre_ids: [18, 80],
-//   },
-//   {
-//     id: 9,
-//     title: "The Silence of the Lambs",
-//     poster_path: "/uS9m8OBk1A8eM9I042bx8XXpqAq.jpg",
-//     vote_average: 8.3,
-//     release_date: "1991-02-01",
-//     genre_ids: [27, 53, 80],
-//   },
-//   {
-//     id: 10,
-//     title: "Interstellar",
-//     poster_path: "/gEU2QniE6E77NI6lCU6MxlNBvIx.jpg",
-//     vote_average: 8.4,
-//     release_date: "2014-11-05",
-//     genre_ids: [12, 18, 878],
-//   },
-// ]
+import { Movie } from "@/lib/types"
 
 const genreMap: Record<number, string> = {
   12: "Adventure",
@@ -119,18 +25,13 @@ const genreMap: Record<number, string> = {
   878: "Sci-Fi",
 }
 
-
-
 export default function RecommendationsPage() {
   const [favorites, setFavorites] = useState<Movie[]>([])
   const [recommendations, setRecommendations] = useState<Movie[]>([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    // Simulate API fetch with a delay
     const timer = setTimeout(() => {
-      // setFavorites(mockFavorites)
-      // setRecommendations(mockRecommendations)
       setLoading(false)
     }, 1000)
 
@@ -245,7 +146,7 @@ export default function RecommendationsPage() {
 }
 
 function MovieCard({ movie, isFavorite = false }: { movie: Movie; isFavorite?: boolean }) {
-  const primaryGenre = movie.genre_ids[0] ? genreMap[movie.genre_ids[0]] : "Unknown"
+  const primaryGenre = movie.genre_ids && movie.genre_ids[0] ? genreMap[movie.genre_ids[0]] : "Unknown"
   return (
     <Card className="overflow-hidden h-full transition-all duration-200 hover:shadow-lg hover:scale-105">
       <div className="aspect-[2/3] relative">
