@@ -1,5 +1,3 @@
-from .db import client
-from .schema import User, Movie
-from .schema import test
+from .db import supabase as client
 
-__all__ = ["client", "User", "Movie", "test"]
+__all__ = ["client"]

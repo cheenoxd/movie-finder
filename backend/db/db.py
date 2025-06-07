@@ -1,22 +1,13 @@
-from pymongo.mongo_client import MongoClient
-from pymongo.server_api import ServerApi
 import os
+from supabase import create_client, Client
 from dotenv import load_dotenv
 
 load_dotenv()
 
-uri = os.getenv("MONGO_URI")
+SUPABASE_URL = os.getenv("SUPABASE_URL")
+SUPABASE_SERVICE_KEY = os.getenv("SUPABASE_SERVICE_KEY")
 
-# Force TLS, allow self-signed certs
-client = MongoClient(
-    uri,
-    server_api=ServerApi('1'),
-    tls=True,
-    tlsAllowInvalidCertificates=True  # DEV ONLY
-)
+if not SUPABASE_URL or not SUPABASE_SERVICE_KEY:
+    raise ValueError("Missing Supabase credentials in environment variables.")
 
-try:
-    client.admin.command('ping')
-    print("✅ Connected to MongoDB!")
-except Exception as e:
-    print("❌ MongoDB connection error:", e)
+supabase: Client = create_client(SUPABASE_URL, SUPABASE_SERVICE_KEY) 

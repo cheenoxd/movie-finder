@@ -1,50 +1,39 @@
-from mongoengine import *
-import os
-from dotenv import load_dotenv
-import datetime
+from datetime import datetime
+from typing import Optional
+from pydantic import BaseModel, EmailStr
 
-load_dotenv()
+class UserBase(BaseModel):
+    email: EmailStr
+    name: Optional[str] = None
+    picture: Optional[str] = None
 
-MONGO_URI = os.getenv("MONGO_URI")
-connect(
-    db="movie-haven",
-    host="mongodb+srv://debDB:loldev@dev.a36fgdc.mongodb.net/movie-haven?retryWrites=true&w=majority",
-    tls=True,
-    tlsAllowInvalidCertificates=False
-)
+class UserCreate(UserBase):
+    pass
 
+class UserInDB(UserBase):
+    id: str
+    created_at: datetime
 
-class Movie(Document):
-    favourite_movie = StringField(required=True)
+    class Config:
+        from_attributes = True
 
-    meta = {
-        'collection': 
-        'movie'
-        }
-    
+# Database table definitions
+USERS_TABLE = """
+create table if not exists public.users (
+    id uuid default gen_random_uuid() primary key,
+    email text unique not null,
+    name text,
+    picture text,
+    created_at timestamp with time zone default timezone('utc'::text, now()) not null
+);
+"""
 
-class User(Document):
-    email = StringField()
-    name = StringField()
-    last = StringField()
-    session_token = IntField()
+# RLS Policies
+ENABLE_RLS = """
+alter table public.users enable row level security;
+"""
 
-    meta = {
-        'collection': 
-        'user'
-        }
-
-
-
-
-
-# if __name__ == "__main__":
-    
-#     sample_movie = Movie(favourite_movie="Inception")
-#     sample_movie.save()
-#     print("Inserted sample movie document:", sample_movie.to_json())
-    
-    
-#     sample_user = User(email="user@example.com", name="John", last="Doe")
-#     sample_user.save()
-#     print("Inserted sample user document:", sample_user.to_json())
+ALLOW_ALL_OPERATIONS = """
+create policy "Allow all operations" on public.users
+for all using (true);
+"""
