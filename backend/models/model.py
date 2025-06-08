@@ -1,111 +1,115 @@
-import numpy as np
 import pandas as pd
-import re
+import numpy as np
+from pathlib import Path
 import nltk
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import cosine_similarity
-import kagglehub
+from nltk.corpus import stopwords
+from nltk.tokenize import word_tokenize
+from sentence_transformers import SentenceTransformer
+import faiss
+import pickle
 import os
+from tqdm import tqdm
+import gc
+import torch
+from multiprocessing import Pool, cpu_count
+import re
 
-# nltk.download('punkt_tab')
-# nltk.download('stopwords')
+nltk.download('punkt', quiet=True)
+nltk.download('stopwords', quiet=True)
 
-movies = pd.read_csv("backend/models/movies.csv")
-movies['clean_overview'] = movies['Overview'].fillna('')
+OUTPUT_DIR = Path("output")
+OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-# Clean up text: Convert to lowercase, remove non-alphanumeric characters, and trim spaces
-movies['clean_overview'] = movies['clean_overview'].apply(
-    lambda x: re.sub(r'[^a-z0-9]', ' ', x.lower()) if isinstance(x, str) else ''
-)
-movies['clean_overview'] = movies['clean_overview'].apply(
-    lambda x: re.sub(r'\s+', ' ', x).strip()
-)
-movies['clean_overview'] = movies['clean_overview'].apply(
-    lambda x: ' '.join(x) if isinstance(x, list) else x
-)
+STOP_WORDS = set(stopwords.words('english'))
 
-# Tokenize sentences
-movies['clean_overview'] = movies['clean_overview'].apply(nltk.word_tokenize)
-stop_words = nltk.corpus.stopwords.words('english')
-overview = []
+def preprocess_text(text):
+    if not isinstance(text, str):
+        return ""
+    
+    text = text.lower()
+    
+    text = re.sub(r'[^a-z0-9\s]', ' ', text)
+    text = re.sub(r'\s+', ' ', text).strip()
+    
+    words = text.split()
+    
+    words = [word for word in words if word not in STOP_WORDS]
+    
+    return ' '.join(words)
 
-for sentence in movies['clean_overview']:
-    temp = []
-    for word in sentence:
-        if word not in stop_words or len(word) >= 3:
-            temp.append(word)
-    overview.append(temp)  
+def process_chunk(chunk):
+    return chunk.apply(preprocess_text)
 
-movies['clean_overview'] = overview
-movies['Genres'] = movies['Genres'].apply(
-    lambda x: [item.strip() for item in x] if isinstance(x, list) else x.split(',') if isinstance(x, str) else []
-)
+def main():
+    print("Loading movies data...")
+    movies = pd.read_csv("movies.csv", usecols=['id', 'title', 'overview'])
+    print(f"Loaded {len(movies)} movies")
+    
+    movies['overview_length'] = movies['overview'].fillna('').str.len()
+    movies = movies[movies['overview_length'] > 50]
+    print(f"After filtering short overviews: {len(movies)} movies")
+    
+    print("Preprocessing movie overviews...")
+    n_cores = max(1, cpu_count() - 1)
+    chunk_size = len(movies) // n_cores
+    chunks = [movies['overview'].fillna('').iloc[i:i + chunk_size] for i in range(0, len(movies), chunk_size)]
+    
+    with Pool(n_cores) as pool:
+        processed_chunks = list(tqdm(
+            pool.imap(process_chunk, chunks),
+            total=len(chunks),
+            desc="Processing chunks"
+        ))
+    
+    movies['clean_overview'] = pd.concat(processed_chunks)
+    
+    print("Loading sentence transformer model...")
+    model = SentenceTransformer('all-MiniLM-L6-v2')
+    
+    device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+    model = model.to(device)
+    print(f"Using device: {device}")
+    
+    print("Generating embeddings...")
+    batch_size = 128
+    embeddings = []
+    
+    for i in tqdm(range(0, len(movies), batch_size)):
+        batch = movies['clean_overview'].iloc[i:i+batch_size].tolist()
+        batch_embeddings = model.encode(batch, show_progress_bar=False, convert_to_numpy=True)
+        embeddings.append(batch_embeddings)
+        
+        if torch.cuda.is_available():
+            torch.cuda.empty_cache()
+    
+    embeddings = np.vstack(embeddings)
+    
+    print("Creating FAISS index...")
+    dimension = embeddings.shape[1]
+    index = faiss.IndexFlatIP(dimension)
+    
+    faiss.normalize_L2(embeddings)
+    index.add(embeddings.astype('float32'))
+    
+    print("Saving index and movie data...")
+    faiss.write_index(index, str(OUTPUT_DIR / "movie_index.faiss"))
+    
+    movies.to_csv(OUTPUT_DIR / "processed_movies.csv", index=False)
+    np.save(OUTPUT_DIR / "movie_embeddings.npy", embeddings)
+    
+    config = {
+        'model_name': 'all-MiniLM-L6-v2',
+        'dimension': dimension,
+        'similarity_threshold': 0.3
+    }
+    with open(OUTPUT_DIR / "model_config.pkl", 'wb') as f:
+        pickle.dump(config, f)
+    
+    print("Done! Files saved to output directory:")
+    print(f"- FAISS index: {OUTPUT_DIR / 'movie_index.faiss'}")
+    print(f"- Processed movies: {OUTPUT_DIR / 'processed_movies.csv'}")
+    print(f"- Movie embeddings: {OUTPUT_DIR / 'movie_embeddings.npy'}")
+    print(f"- Model config: {OUTPUT_DIR / 'model_config.pkl'}")
 
-movies['Actors'] = movies['Actors'].apply(
-    lambda x: [actor.strip() for actor in x.split(',')[:4]] if isinstance(x, str) else x if isinstance(x, list) else []
-)
-
-movies['Director'] = movies['Director'].apply(
-    lambda x: [director.strip() for director in x.split(',')] if isinstance(x, str) else x if isinstance(x, list) else []
-)
-
-def clean(sentence):
-    temp = []
-    for word in sentence:
-        temp.append(word.lower().replace(' ', ''))
-    return temp
-
-movies['Genres'] = [clean(x) for x in movies['Genres']]
-movies['Actors'] = [clean(x) for x in movies['Actors']]
-movies['Director'] = [clean(x) for x in movies['Director']]
-
-
-columns = ['clean_overview','Genres','Actors','Director']
-
-l = []
-
-for i in range(len(movies)):
-    words =''
-    for col in columns:
-        words += ' '.join(movies[col][i]) + ' '
-    l.append(words)
-
-
-movies['clean_overview'] = l
-movies = movies[['Original Title','clean_overview']]
-tfidf = TfidfVectorizer()
-features = tfidf.fit_transform(movies['clean_overview'])
-
-similarity = cosine_similarity(features,features)
-
-index = pd.Series(movies['Original Title'])
-
-## Recommendation Function
-
-def recommend_movies(title):
-    title = title.lower() 
-    matching_indices = index[index.str.lower() == title].index  # Match the title in lowercase
-
-    if len(matching_indices) == 0:
-        print(f"Movie '{title}' not found in the dataset.")
-        return []
-
-    idx = matching_indices[0]
-    print(f"Found movie at index {idx}.")
-
-    # Compute similarity scores
-    score = pd.Series(similarity[idx]).sort_values(ascending=False)
-
-    # Get top 10 recommended movie indices (excluding the input movie itself)
-    top10_indices = score.index[1:11]  # Exclude the first index (the input movie itself)
-
-    # Retrieve movie titles for recommendations
-    recommended_movies = []
-    for i in top10_indices:
-        recommended_movies.append(movies['Original Title'][i])
-
-    return recommended_movies
-
-
-
-print(recommend_movies("Diary of a Wimpy Kid"))
+if __name__ == "__main__":
+    main()
